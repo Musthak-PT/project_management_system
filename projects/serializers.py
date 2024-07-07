@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .models import Project
 from users.models import User
-from users.serializers import UserSerializer
 
 #Create or update serializer
 class CreateOrUpdateProjectSerializer(serializers.ModelSerializer):
