@@ -1,9 +1,7 @@
-from rest_framework import viewsets
 from .models import User
 from .serializers import CreateOrUpdateUserSerializer, LoginSerializer, LogoutSerializer
 from .schemas import LoginResponseSchema
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.generics import GenericAPIView
 from project_management.response import ResponseInfo
 from rest_framework.response import Response

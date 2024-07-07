@@ -1,4 +1,3 @@
-from rest_framework import viewsets
 from .models import Milestone
 from .serializers import CreateOrUpdateMilestoneSerializer, DeleteMilestoneApiRequestSerializer
 from rest_framework.permissions import IsAuthenticated
@@ -7,7 +6,6 @@ from .schemas import MilestoneResponseSchema
 from rest_framework import filters
 from rest_framework.response import Response
 from project_management.response import ResponseInfo
-from django_acl.utils.helper import get_object_or_none
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from users.permissions import IsAdmin, IsManager, IsMember

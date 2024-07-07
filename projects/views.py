@@ -1,4 +1,3 @@
-from rest_framework import viewsets
 from .models import Project
 from .serializers import DeleteProjectApiRequestSerializer, CreateOrUpdateProjectSerializer
 from rest_framework.permissions import IsAuthenticated
@@ -7,21 +6,21 @@ from .schemas import ProjectsResponseSchema
 from rest_framework import filters
 from rest_framework.response import Response
 from project_management.response import ResponseInfo
-from django_acl.utils.helper import get_object_or_none
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from users.permissions import IsAdmin, IsManager, IsMember
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 # Create your views here.
-
-#_________________________________Listing of projects_______________________
+#_________________________________Listing of projects with caching_______________________
+@method_decorator(cache_page(60*15), name='get')  # Cache for 15 minutes
 class ProjectListingApiView(generics.ListAPIView):
     queryset = Project.objects.all().order_by('-id')
     serializer_class = ProjectsResponseSchema
     filter_backends = [filters.SearchFilter]
     search_fields = ['id']
     permission_classes = [IsAuthenticated, IsMember]
-
 
     def get(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -33,7 +32,7 @@ class ProjectListingApiView(generics.ListAPIView):
         page = self.paginate_queryset(queryset)
         serializer = self.serializer_class(page, many=True, context={'request': request})
         
-        return self.get_paginated_response(serializer.data) 
+        return self.get_paginated_response(serializer.data)
     
 
 #_________________________________create or update of projects_______________________
@@ -76,7 +75,6 @@ class CreateOrUpdateProjectsApiView(generics.GenericAPIView):
                 "status": False,
                 "message": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
             
 #_________________________________Delete projects_______________________
 class DeleteProjectsApiView(generics.GenericAPIView):
