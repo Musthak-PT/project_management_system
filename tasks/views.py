@@ -11,6 +11,7 @@ from django_acl.utils.helper import get_object_or_none
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
+from users.permissions import IsAdmin, IsManager, IsMember
 
 # Create your views here.
 
@@ -20,6 +21,8 @@ class TaskListingApiView(generics.ListAPIView):
     serializer_class = TasksResponseSchema
     filter_backends = [filters.SearchFilter]
     search_fields = ['id']
+    permission_classes = [IsAuthenticated, IsMember]
+
 
     def get(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -38,6 +41,8 @@ class TaskListingApiView(generics.ListAPIView):
 
 class CreateOrUpdateTasksApiView(generics.GenericAPIView):
     serializer_class = CreateOrUpdateTaskSerializer
+    permission_classes = [IsAuthenticated, IsManager]
+
 
     def post(self, request):
         try:
@@ -82,7 +87,7 @@ class DeleteTasksApiView(generics.GenericAPIView):
         super(DeleteTasksApiView, self).__init__(**kwargs)
 
     serializer_class = DeleteTasksApiRequestSerializer
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated, IsAdmin]
 
     def delete(self, request):
         try:
@@ -112,7 +117,7 @@ class DeleteTasksApiView(generics.GenericAPIView):
 #_________________________________Assign Tasks to users_______________________
 class AssignTasksApiView(APIView):
     serializer_class = AssignTasksSerializer
-
+    permission_classes = [IsAuthenticated, IsAdmin]
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():

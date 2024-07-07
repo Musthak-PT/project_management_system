@@ -12,11 +12,12 @@ from django.shortcuts import get_object_or_404
 from users.models import User
 from django.contrib import auth
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from users.permissions import IsAdmin
 
 #_______________________Create or update user_______________
 class CreateOrUpdateUserApiView(generics.GenericAPIView):
     serializer_class = CreateOrUpdateUserSerializer
+    permission_classes = [IsAuthenticated, IsAdmin]
 
     def post(self, request):
         try:

@@ -10,6 +10,7 @@ from project_management.response import ResponseInfo
 from django_acl.utils.helper import get_object_or_none
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from users.permissions import IsAdmin, IsManager, IsMember
 
 # Create your views here.
 
@@ -19,6 +20,8 @@ class ProjectListingApiView(generics.ListAPIView):
     serializer_class = ProjectsResponseSchema
     filter_backends = [filters.SearchFilter]
     search_fields = ['id']
+    permission_classes = [IsAuthenticated, IsMember]
+
 
     def get(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -37,6 +40,7 @@ class ProjectListingApiView(generics.ListAPIView):
 
 class CreateOrUpdateProjectsApiView(generics.GenericAPIView):
     serializer_class = CreateOrUpdateProjectSerializer
+    permission_classes = [IsAuthenticated, IsManager]
 
     def post(self, request):
         try:
@@ -81,7 +85,7 @@ class DeleteProjectsApiView(generics.GenericAPIView):
         super(DeleteProjectsApiView, self).__init__(**kwargs)
 
     serializer_class = DeleteProjectApiRequestSerializer
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated, IsAdmin]
 
     def delete(self, request):
         try:

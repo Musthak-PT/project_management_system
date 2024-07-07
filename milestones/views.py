@@ -10,7 +10,7 @@ from project_management.response import ResponseInfo
 from django_acl.utils.helper import get_object_or_none
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-
+from users.permissions import IsAdmin, IsManager, IsMember
 # Create your views here.
 
 #_________________________________Listing of Tasks_______________________
@@ -19,6 +19,7 @@ class MilestoneListingApiView(generics.ListAPIView):
     serializer_class = MilestoneResponseSchema
     filter_backends = [filters.SearchFilter]
     search_fields = ['id']
+    permission_classes = [IsAuthenticated, IsMember]
 
     def get(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -36,6 +37,7 @@ class MilestoneListingApiView(generics.ListAPIView):
 #_________________________________create or update of Milestone_______________________
 class CreateOrUpdateMilestoneApiView(generics.GenericAPIView):
     serializer_class = CreateOrUpdateMilestoneSerializer
+    permission_classes = [IsAuthenticated, IsManager]
 
     def post(self, request):
         try:
@@ -79,7 +81,7 @@ class DeleteMilestoneApiView(generics.GenericAPIView):
         super(DeleteMilestoneApiView, self).__init__(**kwargs)
 
     serializer_class = DeleteMilestoneApiRequestSerializer
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated, IsAdmin]
 
     def delete(self, request):
         try:
