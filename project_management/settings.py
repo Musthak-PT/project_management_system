@@ -42,10 +42,12 @@ INSTALLED_APPS = [
     'users',
     'projects',
     'tasks',
+    'drf_yasg',
     'milestones',
     'notifications',
-    'corsheaders',
+    # 'corsheaders',
     'rest_framework_simplejwt',
+    'django_acl',
 ]
 
 MIDDLEWARE = [
@@ -57,7 +59,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     
-    'corsheaders.middleware.CorsMiddleware',
+    # 'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'project_management.urls'
@@ -141,8 +143,9 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10,
 }
-
 
 
 # CORS settings
