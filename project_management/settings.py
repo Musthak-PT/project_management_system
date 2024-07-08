@@ -181,10 +181,10 @@ CACHES = {
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-ADMIN_MAIL ="musthakpt786@gmail.com"
+ADMIN_MAIL ="Enter_admin_mail"
 EMAIL_DOMAIN = "127.0.0.1:8000"
-EMAIL_HOST_USER = "musthakpt786@gmail.com"
-EMAIL_HOST_PASSWORD = 'smwwemluwypnoyev'
+EMAIL_HOST_USER = "Enter_your_mail"
+EMAIL_HOST_PASSWORD = 'Enter_app_password'
 EMAIL_SENDER_NAME = 'Project_management_system'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
