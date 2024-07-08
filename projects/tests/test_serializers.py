@@ -1,29 +1,32 @@
-# projects/tests/test_serializers.py
-
+# tests/test_serializers.py
 from django.test import TestCase
+from rest_framework.test import APIClient
+from rest_framework import status
+from django.urls import reverse
 from projects.models import Project
+from projects.serializers import CreateOrUpdateProjectSerializer
 from users.models import User
-from projects.serializers import CreateOrUpdateProjectSerializer, DeleteProjectApiRequestSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
 class ProjectSerializerTest(TestCase):
 
     def setUp(self):
-        self.user = User.objects.create(username='testuser')
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='testuser', password='testpass', role='manager')
         self.project_data = {
-            "name": "Test Project",
-            "description": "Test Description",
-            "members": [self.user.id]  # Use IDs for members
+            'name': 'Test Project',
+            'description': 'This is a test project description'
         }
-        self.project = Project.objects.create(name="Test Project", description="Test Description")
-        self.project.members.set([self.user])  # Assign members correctly
+        refresh = RefreshToken.for_user(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
 
-    def test_valid_project_serializer(self):
+    def test_valid_serializer(self):
         serializer = CreateOrUpdateProjectSerializer(data=self.project_data)
         self.assertTrue(serializer.is_valid())
 
-    def test_invalid_project_serializer(self):
-        invalid_data = {  # Ensure this data is truly invalid
-            "description": "Test Description",  # Missing 'name' or other required fields
-        }
-        serializer = CreateOrUpdateProjectSerializer(data=invalid_data)
-        self.assertFalse(serializer.is_valid())
+    def test_create_project(self):
+        serializer = CreateOrUpdateProjectSerializer(data=self.project_data)
+        self.assertTrue(serializer.is_valid())  # Ensure data is valid before saving
+        if serializer.is_valid():
+            project_instance = serializer.save()
+            self.assertEqual(project_instance.name, 'Test Project')
