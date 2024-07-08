@@ -12,7 +12,8 @@ from rest_framework.views import APIView
 from users.permissions import IsAdmin, IsManager, IsMember
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-
+from notifications.send_mail import send_email_notification
+from notifications.models import Notification
 # Create your views here.
 
 #_________________________________Listing of Tasks with caching_______________________
@@ -96,8 +97,7 @@ class AssignTasksApiView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 #_________________________________________Creation and updation of tasks using celery_____________________________
-from notifications.tasks import send_email_notification
-from notifications.models import Notification
+
 class CreateOrUpdateTasksApiView(generics.GenericAPIView):
     serializer_class = CreateOrUpdateTaskSerializer
     permission_classes = [IsAuthenticated, IsManager]
@@ -119,8 +119,10 @@ class CreateOrUpdateTasksApiView(generics.GenericAPIView):
                 saved_instance = serializer.save()
                 # Send notification
                 message = f'Task {saved_instance.name} has been {action}.'
-                Notification.objects.create(user=request.user, message=message)
-                send_email_notification.delay(request.user.id, message)
+                instance = Notification.objects.create(user=request.user, message=message)
+                # send_email_notification.delay(request.user.id, message)
+                send_email_notification(request, instance)
+
                 serialized_data = self.serializer_class(saved_instance, context={'request': request}).data
                 response_data = {
                     "status_code": status.HTTP_201_CREATED,
@@ -137,6 +139,7 @@ class CreateOrUpdateTasksApiView(generics.GenericAPIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
         
         except Exception as e:
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",e)
             return Response({
                 "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
                 "status": False,

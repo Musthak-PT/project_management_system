@@ -1,5 +1,4 @@
 from django.urls import path
-# from .views import MilestoneViewSet
 from . import views
 
 app_name = 'milestones'
