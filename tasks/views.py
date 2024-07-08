@@ -14,7 +14,9 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from notifications.tasks import send_email_notification
 from notifications.models import Notification
+import logging
 
+logger = logging.getLogger('django')
 # Create your views here.
 
 #_________________________________Listing of Tasks with caching_______________________
@@ -98,11 +100,9 @@ class AssignTasksApiView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 #_________________________________________Creation and updation of tasks using celery_____________________________
-
-
 class CreateOrUpdateTasksApiView(generics.GenericAPIView):
     serializer_class = CreateOrUpdateTaskSerializer
-    permission_classes = [IsAuthenticated , IsManager]
+    permission_classes = [IsAuthenticated, IsManager]
 
     def post(self, request):
         try:
@@ -123,7 +123,10 @@ class CreateOrUpdateTasksApiView(generics.GenericAPIView):
                 # Send notification
                 message = f'Task {saved_instance.name} has been {action}.'
                 Notification.objects.create(user=request.user, message=message)
-            
+                
+                # Log parameters before calling the Celery task
+                logger.debug(f"Sending email notification to {request.user.email} with subject 'Task Notification' and message '{message}'")
+                
                 # Use Celery to send email notification asynchronously
                 send_email_notification.delay(request.user.email, 'Task Notification', message)
 
@@ -143,6 +146,7 @@ class CreateOrUpdateTasksApiView(generics.GenericAPIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
         
         except Exception as e:
+            logger.error(f"Error occurred: {str(e)}")
             return Response({
                 "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
                 "status": False,
