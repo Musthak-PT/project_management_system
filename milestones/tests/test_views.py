@@ -12,9 +12,11 @@ class MilestoneViewTest(APITestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username='testuser', password='testpass', role='manager')
+        self.user = User.objects.create_user(username='testuser', password='testpass', role='admin')
         self.project = Project.objects.create(name="Test Project")
-        
+        self.milestone = Milestone.objects.create(project=self.project, name="Test Milestone",
+                                                  due_date=timezone.now().date())
+
         # Get token and authenticate
         refresh = RefreshToken.for_user(self.user)
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
@@ -33,8 +35,25 @@ class MilestoneViewTest(APITestCase):
             "due_date": due_date.strftime('%Y-%m-%d')  # Format due_date properly
         }
         response = self.client.post(url, data, format='json')
-        
-        # Print response data for debugging
-        print(response.data)
-        
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        print(">>>>>>>>>>>>>>Milestone creation>>>>>>>>>>>>>>", response.data)
+        milestone_id = response.data['data']['id']
+
+        # Test milestone update
+        updated_data = {
+            "id": milestone_id,
+            "project": self.project.id,
+            "name": "Updated Milestone",
+            "due_date": due_date.strftime('%Y-%m-%d')
+        }
+        update_url = reverse('milestones:create-or-update-milestone')
+        update_response = self.client.post(update_url, updated_data, format='json')
+        self.assertEqual(update_response.status_code, status.HTTP_201_CREATED)
+        print(">>>>>>>>>>>>>>Milestone update>>>>>>>>>>>>>>", update_response.data)
+
+        # Test milestone deletion
+        delete_url = reverse('milestones:delete-milestone')
+        delete_data = {'id': milestone_id}
+        delete_response = self.client.delete(delete_url, delete_data, format='json')
+        self.assertEqual(delete_response.status_code, status.HTTP_200_OK)
+        print(">>>>>>>>>>>>>>Milestone deletion>>>>>>>>>>>>>>", delete_response.data)
