@@ -5,6 +5,8 @@ from django.utils.html import strip_tags
 from django.core.mail import  get_connection
 from project_management import settings
 import threading
+from django.template.loader import get_template
+
 
 class SendEmails:
     
@@ -31,18 +33,13 @@ class SendEmails:
             connection.close()
             sending_status    = True
         except Exception as es:
+            print("1111111111111111111111111111111", es)
             pass
         return sending_status
 
-
-from django.template.loader import get_template
-template_path = 'notifications/templates/mail.html'
-full_template_path = settings.BASE_DIR / template_path 
-template = get_template(full_template_path)
-
-
 def send_email_notification(request, instance):
     try:
+        # import pdb;pdb.set_trace()
         admin_email = settings.ADMIN_MAIL
         subject = "Task Notification"
         context = {
@@ -54,7 +51,7 @@ def send_email_notification(request, instance):
         }
 
         send_email = SendEmails()
-        x = threading.Thread(target=send_email.sendTemplateEmail, args=(subject, request, context, template, settings.EMAIL_HOST_USER, admin_email))
+        x = threading.Thread(target=send_email.sendTemplateEmail, args=(subject, request, context, 'templates/mail.html', settings.EMAIL_HOST_USER, settings.EMAIL_HOST_USER))
         x.start()
     except Exception as es:
         print(">>>>>>>>>>>>>>send mail>>>>>>>>>>>>>>>",es)
